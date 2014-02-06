@@ -11,7 +11,7 @@ module ActiveRecord
 #             <param_field> =>
 #               {
 #                 :filter_type => <:string|:hash>, :filter_operator => <:gt|:lt|:gteq|:lteq:in:not_in>,
-#                 :source_table => <table_name_sym>, :column => <col_name_sym>
+#                 :source_table_model => <ar_class>, :column => <col_name_sym>
 #               }
 #           }
 #         :association1 =>
@@ -19,13 +19,13 @@ module ActiveRecord
 #             <param_field> =>
 #               {
 #                 :filter_type => <:string|:hash>, :filter_operator => <:gt|:lt|:gteq|:lteq|:in|:not_in>,
-#                 :source_table => <table_name_sym>, :column => <col_name_sym>
+#                 :source_table_model => <ar_class>, :column => <col_name_sym>
 #               },
 #             ...
 #             :join_filter =>
 #               {
-#                 :source_table1 => <table_name>, :table1_column => <column_name>,
-#                 :source_table2 => <table_name>, :table2_column => <column_name>,
+#                 :source_table_model1 => <table_name>, :table1_column => <column_name>,
+#                 :source_table_model2 => <table_name>, :table2_column => <column_name>,
 #               },
 #             :is_inclusion_mandatory => <true|false>
 #           },
@@ -34,10 +34,6 @@ module ActiveRecord
 
 
   class ConditionBuilder
-
-    def initialize
-      @table_arel = {}
-    end
 
     def apply_includes_and_where_clauses(params,query_spec)
       model = query_spec.keys.first
@@ -85,8 +81,8 @@ module ActiveRecord
 
     def get_association_join_filter(join_filter)
       return if join_filter.blank?
-      t1,t2,c1,c2 = join_filter.values_at(:source_table1,:source_table2,:table1_column,:table2_column)
-      t2_arel = get_table_arel(t2)
+      t1,t2,c1,c2 = join_filter.values_at(:source_table_model1,:source_table_model2,:table1_column,:table2_column)
+      t2_arel = t2.arel_table
       get_where_clause_sql(t2_arel[c2], t1, c1, :eq)
     end
 
@@ -102,25 +98,20 @@ module ActiveRecord
     end
 
     def construct_str_filter(arg_value,filter_spec)
-      operator, table, column = filter_spec.values_at(:filter_operator,:source_table,:column)
+      operator, table, column = filter_spec.values_at(:filter_operator,:source_table_model,:column)
       get_where_clause_sql(arg_value, table, column, operator)
     end
 
     def get_where_clause_sql(arg_value, table, column, operator)
-      table_arel = get_table_arel(table)
+      table_arel = table.arel_table
       sql = table_arel.where(table_arel[column].send(operator, arg_value)).to_sql
       sql.split("WHERE").last
     end
 
-    def get_table_arel(table)
-      @table_arel[table] ||= Arel::Table.new(table)
-      @table_arel[table]
-    end
-
     def construct_hash_filter(arg_value,filter_spec)
-      table, column = filter_spec.values_at(:source_table,:column)
+      table, column = filter_spec.values_at(:source_table_model,:column)
       hash_filter = {column => arg_value}
-      (table != :self)? {table => hash_filter} : hash_filter
+      (table != :self)? {table.table_name.to_sym => hash_filter} : hash_filter
     end
   end
 end

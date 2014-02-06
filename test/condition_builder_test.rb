@@ -5,12 +5,15 @@ require 'bundler/setup'
 require "shoulda"
 require "test/unit"
 require "activerecord-auto_filter"
+
+require_relative "helpers/sample_model_definitions"
 require_relative "helpers/db_setup_helper"
 
 # temp
 require_relative "../lib/activerecord-auto_filter/condition_builder"
 
 class ConditionBuilderTest < Test::Unit::TestCase
+  include SampleModelDefinitions
   include DbSetupHelper
 
   def setup
@@ -34,15 +37,18 @@ class ConditionBuilderTest < Test::Unit::TestCase
       params = {:f1 => "f1_val", :f2 => "f2_val", :f3 => 4}
       result = get_build_result(params).last
       query_details = result[:root_model]
+      table1_name = Order.table_name.to_sym
+      table2_name = OrderItem.table_name.to_sym
+      table3_name = Product.table_name.to_sym
 
       # Check string filter exists and its structure
       association_containing_hash_filter = query_details.delete(:association2)
-      assert_equal([{:t2 => {:c2 => "f2_val"}}], association_containing_hash_filter)
+      assert_equal([{table2_name => {:c2 => "f2_val"}}], association_containing_hash_filter)
 
       # Check hash filter exists and its structure
       assert(query_details.all? do |association,filter_details|
         string_where_clause = filter_details.first
-        string_where_clause.match(/t1.*c1.*f1_val/) or string_where_clause.match(/t3.*c3.*4/)
+        string_where_clause.match(/#{table1_name}.*c1.*f1_val/) or string_where_clause.match(/#{table3_name}.*c3.*4/)
       end)
     end
 
@@ -52,7 +58,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
       query_spec[:root_model][:association2][:f4] =
           {
             :filter_type => :string, :filter_operator => :eq,
-            :source_table => :t4, :column => :c4
+            :source_table_model => OrderItemUnit, :column => :c4
           }
 
       result = @builder.emit_inclusion_and_filter_details(params, query_spec)
@@ -60,18 +66,24 @@ class ConditionBuilderTest < Test::Unit::TestCase
     end
 
     should "contain join filters" do
+      table1_model = Order
+      table2_model = OrderItem
+      table1_name = table1_model.table_name
+      table2_name = table2_model.table_name
       params = {:f2 => "f2_val", :f3 => 4}
+
       query_spec = get_sample_query_spec
+
       query_spec[:root_model][:association2][:join_filter] =
           {
-             :source_table1 => :table1_name, :table1_column => :col1,
-             :source_table2 => :table2_name, :table2_column => :col2,
+             :source_table_model1 => table1_model, :table1_column => :col1,
+             :source_table_model2 => table2_model, :table2_column => :col2,
           }
       result = @builder.emit_inclusion_and_filter_details(params, query_spec)
 
       assert_equal(2,result[:root_model][:association2].size)
       assert(result[:root_model][:association2].any? do |filter|
-          filter.class == String and filter.match(/table1_name.*col1.*table2_name.*col2.*/)
+          filter.class == String and filter.match(/#{table1_name}.*col1.*#{table2_name}.*col2.*/)
       end)
     end
   end
@@ -101,7 +113,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
                         :f1 =>
                             {
                                 :filter_type => :string, :filter_operator => :lt,
-                                :source_table => :t1, :column => :c1
+                                :source_table_model => Order, :column => :c1
                             }
                     },
                 :association2 =>
@@ -109,7 +121,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
                         :f2 =>
                             {
                                 :filter_type => :hash, :filter_operator => :eq,
-                                :source_table => :t2, :column => :c2
+                                :source_table_model => OrderItem, :column => :c2
                             }
                     },
                 :association3 =>
@@ -117,7 +129,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
                         :f3 =>
                             {
                                 :filter_type => :string, :filter_operator => :gteq,
-                                :source_table => :t3, :column => :c3
+                                :source_table_model => Product, :column => :c3
                             }
                     }
             }

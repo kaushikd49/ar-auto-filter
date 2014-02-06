@@ -2,12 +2,15 @@ require 'rubygems'
 require 'bundler/setup'
 require 'active_record'
 require "activerecord-auto_filter"
+require_relative "test/helpers/sample_model_definitions"
 require_relative "test/helpers/db_setup_helper"
 
 
 #temp
 require "./lib/activerecord-auto_filter/condition_builder"
 
+
+include SampleModelDefinitions
 include DbSetupHelper
 
 def run_demo
@@ -49,24 +52,6 @@ def create_tables
 end
 
 
-# AR definitions
-class Order < ActiveRecord::Base
-  has_one :product
-  has_many :order_items
-  has_many :order_item_units, :through => :order_items
-end
-
-class OrderItem < ActiveRecord::Base
-  has_many :order_item_units
-end
-
-class OrderItemUnit < ActiveRecord::Base
-end
-
-class Product < ActiveRecord::Base
-end
-
-
 def get_query_spec
   {
       Order =>
@@ -76,7 +61,7 @@ def get_query_spec
                       :fsn =>
                           {
                               :filter_type => :hash, :filter_operator => :eq,
-                              :source_table => :orders, :column => :fsn
+                              :source_table_model => Order, :column => :fsn
                           }
                   },
               :order_items =>
@@ -84,7 +69,7 @@ def get_query_spec
                       :state =>
                           {
                               :filter_type => :hash, :filter_operator => :eq,
-                              :source_table => :order_items, :column => :state
+                              :source_table_model => OrderItem, :column => :state
                           }
                   },
               :product =>
@@ -92,17 +77,17 @@ def get_query_spec
                       :vertical =>
                           {
                               :filter_type => :hash, :filter_operator => :eq,
-                              :source_table => :products, :column => :vertical
+                              :source_table_model => Product, :column => :vertical
                           },
                       :price_from =>
                           {
                               :filter_type => :string, :filter_operator => :gteq,
-                              :source_table => :products, :column => :selling_price
+                              :source_table_model => Product, :column => :selling_price
                           },
                       :price_to =>
                           {
                               :filter_type => :string, :filter_operator => :lt,
-                              :source_table => :products, :column => :selling_price
+                              :source_table_model => Product, :column => :selling_price
                           }
                   },
               :order_item_units =>
@@ -110,7 +95,7 @@ def get_query_spec
                       :size =>
                           {
                               :filter_type => :hash, :filter_operator => :eq,
-                              :source_table => :order_item_units, :column => :size
+                              :source_table_model => OrderItemUnit, :column => :size
                           }
                   }
           }

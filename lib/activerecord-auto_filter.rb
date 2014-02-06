@@ -1,5 +1,5 @@
 require "activerecord-auto_filter/version"
-require "./lib/activerecord-auto_filter/condition_builder"
+#require "./lib/activerecord-auto_filter/condition_builder"
 
 module Activerecord::Base
 
