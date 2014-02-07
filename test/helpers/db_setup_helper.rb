@@ -1,5 +1,3 @@
-require "logger"
-
 module DbSetupHelper
   DATABASE = 'experiments'
   CONNECTION_SPEC = {adapter: 'mysql2', username: 'root', password: '', host: 'localhost'}

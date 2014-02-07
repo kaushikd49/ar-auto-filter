@@ -33,7 +33,7 @@ module ActiveRecord
 #     }
 
 
-  class ConditionBuilder
+  module ConditionBuilder
 
     def apply_includes_and_where_clauses(params,query_spec)
       model = query_spec.keys.first
@@ -79,6 +79,7 @@ module ActiveRecord
       end
     end
 
+    private
     def get_association_join_filter(join_filter)
       return if join_filter.blank?
       t1,t2,c1,c2 = join_filter.values_at(:source_table_model1,:source_table_model2,:table1_column,:table2_column)

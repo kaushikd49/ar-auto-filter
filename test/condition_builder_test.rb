@@ -15,11 +15,11 @@ require_relative "../lib/activerecord-auto_filter/condition_builder"
 class ConditionBuilderTest < Test::Unit::TestCase
   include SampleModelDefinitions
   include DbSetupHelper
+  include ActiveRecord::ConditionBuilder
 
   def setup
     super
     do_db_setups
-    @builder = ActiveRecord::ConditionBuilder.new
   end
 
   context "inclusions check" do
@@ -61,7 +61,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
             :source_table_model => OrderItemUnit, :column => :c4
           }
 
-      result = @builder.emit_inclusion_and_filter_details(params, query_spec)
+      result = emit_inclusion_and_filter_details(params, query_spec)
       assert_equal(2,result[:root_model][:association2].size)
     end
 
@@ -78,7 +78,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
              :source_table_model1 => table1_model, :table1_column => :col1,
              :source_table_model2 => table2_model, :table2_column => :col2,
           }
-      result = @builder.emit_inclusion_and_filter_details(params, query_spec)
+      result = emit_inclusion_and_filter_details(params, query_spec)
 
       assert_equal(2,result[:root_model][:association2].size)
       assert(result[:root_model][:association2].any? do |filter|
@@ -101,7 +101,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
 
   def get_generated_conditions(params)
     query_spec = get_sample_query_spec
-    result = @builder.emit_inclusion_and_filter_details(params, query_spec)
+    result = emit_inclusion_and_filter_details(params, query_spec)
     return query_spec, result
   end
 

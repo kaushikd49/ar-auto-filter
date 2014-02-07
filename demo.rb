@@ -1,5 +1,5 @@
-require 'rubygems'
 require 'bundler/setup'
+require "logger"
 require "./lib/activerecord-auto_filter"
 require_relative "test/helpers/sample_model_definitions"
 require_relative "test/helpers/db_setup_helper"
