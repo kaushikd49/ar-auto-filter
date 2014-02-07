@@ -24,8 +24,8 @@ module ActiveRecord
 #             ...
 #             :join_filter =>
 #               {
-#                 :source_table_model1 => <table_name>, :table1_column => <column_name>,
-#                 :source_table_model2 => <table_name>, :table2_column => <column_name>,
+#                 :source_table_model1 => <ar_class>, :table1_column => <column_name>,
+#                 :source_table_model2 => <ar_class>, :table2_column => <column_name>,
 #               },
 #             :is_inclusion_mandatory => <true|false>
 #           },

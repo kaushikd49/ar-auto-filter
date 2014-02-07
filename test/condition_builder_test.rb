@@ -18,15 +18,15 @@ class ConditionBuilderTest < Test::Unit::TestCase
 
   def setup
     super
-    @builder = ActiveRecord::ConditionBuilder.new
     do_db_setups
+    @builder = ActiveRecord::ConditionBuilder.new
   end
 
   context "inclusions check" do
     should "contain only expected associations for inclusions" do
       params = {:f1 => "f1_val", :f2 => "f2_val", :f3 => 4, :f4 => 41}
       1.upto(params.size) do
-        assert_result_content(params)
+        assert_presence_of_correct_associations(params)
         params.shift
       end
     end
@@ -35,7 +35,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
   context "where clause filter structure check" do
     should "contain appropriate kind filters - string or hash" do
       params = {:f1 => "f1_val", :f2 => "f2_val", :f3 => 4}
-      result = get_build_result(params).last
+      result = get_generated_conditions(params).last
       query_details = result[:root_model]
       table1_name = Order.table_name.to_sym
       table2_name = OrderItem.table_name.to_sym
@@ -70,9 +70,8 @@ class ConditionBuilderTest < Test::Unit::TestCase
       table2_model = OrderItem
       table1_name = table1_model.table_name
       table2_name = table2_model.table_name
-      params = {:f2 => "f2_val", :f3 => 4}
-
       query_spec = get_sample_query_spec
+      params = {:f2 => "f2_val", :f3 => 4}
 
       query_spec[:root_model][:association2][:join_filter] =
           {
@@ -88,17 +87,19 @@ class ConditionBuilderTest < Test::Unit::TestCase
     end
   end
 
-  def assert_result_content(params)
-    query_spec, result = get_build_result(params)
-    associations_to_include = result[:root_model].keys
-    associations_mapped_by_params = query_spec[:root_model].select do |association,filter_field_hash|
-      (filter_field_hash.keys & params.keys).present?
-    end.keys
+  def assert_presence_of_correct_associations(params)
+    query_spec, result = get_generated_conditions(params)
+    associations_to_be_included = result[:root_model].keys
 
-    assert_equal(associations_to_include, associations_mapped_by_params)
+    associations_actually_included =
+        query_spec[:root_model].select do |association,filter_field_hash|
+          (filter_field_hash.keys & params.keys).present?
+        end.keys
+
+    assert_equal(associations_to_be_included, associations_actually_included)
   end
 
-  def get_build_result(params)
+  def get_generated_conditions(params)
     query_spec = get_sample_query_spec
     result = @builder.emit_inclusion_and_filter_details(params, query_spec)
     return query_spec, result
