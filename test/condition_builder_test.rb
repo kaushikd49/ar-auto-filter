@@ -8,8 +8,6 @@ require "activerecord-auto_filter"
 
 require_relative "helpers/sample_model_definitions"
 require_relative "helpers/db_setup_helper"
-
-# temp
 require_relative "../lib/activerecord-auto_filter/condition_builder"
 
 class ConditionBuilderTest < Test::Unit::TestCase
@@ -24,7 +22,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
 
   context "inclusions check" do
     should "contain only expected associations for inclusions" do
-      params = {:f1 => "f1_val", :f2 => "f2_val", :f3 => 4, :f4 => 41}
+      params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4, :f4 => 41}
       1.upto(params.size) do
         assert_presence_of_correct_associations(params)
         params.shift
@@ -34,16 +32,16 @@ class ConditionBuilderTest < Test::Unit::TestCase
 
   context "where clause filter structure check" do
     should "contain appropriate kind filters - string or hash" do
-      params = {:f1 => "f1_val", :f2 => "f2_val", :f3 => 4}
-      result = get_generated_conditions(params).last
-      query_details = result[:root_model]
       table1_name = Order.table_name.to_sym
       table2_name = OrderItem.table_name.to_sym
       table3_name = Product.table_name.to_sym
+      params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4}
+      result = get_generated_conditions(params).last
+      query_details = result[:root_model]
 
       # Check string filter exists and its structure
       association_containing_hash_filter = query_details.delete(:association2)
-      assert_equal([{table2_name => {:c2 => "f2_val"}}], association_containing_hash_filter)
+      assert_equal([{table2_name => {:c2 => :f2_val}}], association_containing_hash_filter)
 
       # Check hash filter exists and its structure
       assert(query_details.all? do |association,filter_details|
@@ -53,7 +51,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
     end
 
     should "contain multiple kind of filters for a given association" do
-      params = {:f1 => "f1_val", :f2 => "f2_val", :f3 => 4, :f4 => 5}
+      params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4, :f4 => 5}
       query_spec = get_sample_query_spec
       query_spec[:root_model][:association2][:f4] =
           {
@@ -71,7 +69,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
       table1_name = table1_model.table_name
       table2_name = table2_model.table_name
       query_spec = get_sample_query_spec
-      params = {:f2 => "f2_val", :f3 => 4}
+      params = {:f2 => :f2_val, :f3 => 4}
 
       query_spec[:root_model][:association2][:join_filter] =
           {
