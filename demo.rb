@@ -22,49 +22,46 @@ end
 
 def get_query_spec
   {
-      Order =>
+      :self =>
           {
-              :self =>
+              :fsn =>
                   {
-                      :fsn =>
-                          {
-                              :filter_type => :hash, :filter_operator => :eq,
-                              :source_table_model => Order, :column => :fsn
-                          }
+                      :filter_type => :hash, :filter_operator => :eq,
+                      :source_table_model => Order, :column => :fsn
+                  }
+          },
+      :order_items =>
+          {
+              :state =>
+                  {
+                      :filter_type => :hash, :filter_operator => :eq,
+                      :source_table_model => OrderItem, :column => :state
+                  }
+          },
+      :product =>
+          {
+              :vertical =>
+                  {
+                      :filter_type => :hash, :filter_operator => :eq,
+                      :source_table_model => Product, :column => :vertical
                   },
-              :order_items =>
+              :price_from =>
                   {
-                      :state =>
-                          {
-                              :filter_type => :hash, :filter_operator => :eq,
-                              :source_table_model => OrderItem, :column => :state
-                          }
+                      :filter_type => :string, :filter_operator => :gteq,
+                      :source_table_model => Product, :column => :selling_price
                   },
-              :product =>
+              :price_to =>
                   {
-                      :vertical =>
-                          {
-                              :filter_type => :hash, :filter_operator => :eq,
-                              :source_table_model => Product, :column => :vertical
-                          },
-                      :price_from =>
-                          {
-                              :filter_type => :string, :filter_operator => :gteq,
-                              :source_table_model => Product, :column => :selling_price
-                          },
-                      :price_to =>
-                          {
-                              :filter_type => :string, :filter_operator => :lt,
-                              :source_table_model => Product, :column => :selling_price
-                          }
-                  },
-              :order_item_units =>
+                      :filter_type => :string, :filter_operator => :lt,
+                      :source_table_model => Product, :column => :selling_price
+                  }
+          },
+      :order_item_units =>
+          {
+              :size =>
                   {
-                      :size =>
-                          {
-                              :filter_type => :hash, :filter_operator => :eq,
-                              :source_table_model => OrderItemUnit, :column => :size
-                          }
+                      :filter_type => :hash, :filter_operator => :eq,
+                      :source_table_model => OrderItemUnit, :column => :size
                   }
           }
   }

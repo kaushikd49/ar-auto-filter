@@ -4,7 +4,6 @@ module ActiveRecord
 ################################# Generic where clause and inclusion builder ###########################
 # Query specification format
 #
-#  <root_model> =>
 #    {
 #         :self =>
 #           {
@@ -36,7 +35,7 @@ module ActiveRecord
   module ConditionBuilder
 
     def apply_includes_and_where_clauses(params,query_spec)
-      model = query_spec.keys.first
+      model = self
       inclusions, where_clauses = get_inclusions_and_where_clauses(params,query_spec)
 
       active_record = model.includes(inclusions)
@@ -45,7 +44,7 @@ module ActiveRecord
     end
 
     def get_inclusions_and_where_clauses(params,query_spec)
-      result = emit_inclusion_and_filter_details(params,query_spec).values.first
+      result = emit_inclusion_and_filter_details(params,query_spec)
       inclusions = result.keys - [:self]
       where_clause_filters = result.values.flatten
 
@@ -53,29 +52,26 @@ module ActiveRecord
     end
 
     def emit_inclusion_and_filter_details(params,query_spec)
-      query_spec.each_with_object({}) do |(parent_model,association_filter_spec),outer_res|
-        outer_res[parent_model] =
-            association_filter_spec.each_with_object({}) do |(association,association_filter_spec), res|
-              join_spec = association_filter_spec.delete(:join_filter)
-              is_inclusion_mandatory = association_filter_spec.delete(:is_inclusion_mandatory)
+      query_spec.each_with_object({}) do |(association,association_filter_spec), res|
+        join_spec = association_filter_spec.delete(:join_filter)
+        is_inclusion_mandatory = association_filter_spec.delete(:is_inclusion_mandatory)
 
-              join_filter = get_association_join_filter(join_spec)
+        join_filter = get_association_join_filter(join_spec)
 
-              where_clause_filters =
-                  association_filter_spec.each_with_object([]) do |(param_field,filter_spec),filter_res|
-                    value = params[param_field]
-                    if value.present?
-                      filter_res << get_where_clause_filter(filter_spec, query_spec, value)
-                    end
-                  end
-
-              if where_clause_filters.present?
-                res[association] =  where_clause_filters
-                res[association] << join_filter if join_filter.present?
-              elsif is_inclusion_mandatory
-                res[association] = (join_filter.present?)? [join_filter] : []
+        where_clause_filters =
+            association_filter_spec.each_with_object([]) do |(param_field,filter_spec),filter_res|
+              value = params[param_field]
+              if value.present?
+                filter_res << get_where_clause_filter(filter_spec, query_spec, value)
               end
             end
+
+        if where_clause_filters.present?
+          res[association] =  where_clause_filters
+          res[association] << join_filter if join_filter.present?
+        elsif is_inclusion_mandatory
+          res[association] = (join_filter.present?)? [join_filter] : []
+        end
       end
     end
 
