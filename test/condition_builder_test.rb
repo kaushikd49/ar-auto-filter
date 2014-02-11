@@ -20,13 +20,23 @@ class ConditionBuilderTest < Test::Unit::TestCase
     do_db_setups
   end
 
+
   context "inclusions check" do
     should "contain only expected associations for inclusions" do
       params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4, :f4 => 41}
-      1.upto(params.size) do
-        assert_presence_of_correct_associations(params)
-        params.shift
-      end
+      assert_associations_are_included(params, [:association2, :association3])
+
+      params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4}
+      assert_associations_are_included(params, [:association2, :association3])
+
+      params = {:f2 => :f2_val, :f3 => 4}
+      assert_associations_are_included(params, [:association2, :association3])
+
+      params = {:f3 => 4}
+      assert_associations_are_included(params, [:association3])
+
+      params = {:f2 => :f2_val}
+      assert_associations_are_included(params, [:association2])
     end
   end
 
@@ -36,14 +46,13 @@ class ConditionBuilderTest < Test::Unit::TestCase
       table2_name = OrderItem.table_name.to_sym
       table3_name = Product.table_name.to_sym
       params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4}
-      result = get_generated_conditions(params).last
-      query_details = result
+      query_details = get_generated_conditions(params).last
 
-      # Check string filter exists and its structure
+      # Check hash filter exists and its structure
       association_containing_hash_filter = query_details.delete(:association2)
       assert_equal([{table2_name => {:c2 => :f2_val}}], association_containing_hash_filter)
 
-      # Check hash filter exists and its structure
+      # Check string filter exists and its structure
       assert(query_details.all? do |association,filter_details|
         string_where_clause = filter_details.first
         string_where_clause.match(/#{table1_name}.*c1.*f1_val/) or string_where_clause.match(/#{table3_name}.*c3.*4/)
@@ -85,16 +94,10 @@ class ConditionBuilderTest < Test::Unit::TestCase
     end
   end
 
-  def assert_presence_of_correct_associations(params)
-    query_spec, result = get_generated_conditions(params)
-    associations_to_be_included = result.keys
-
-    associations_actually_included =
-        query_spec.select do |association,filter_field_hash|
-          (filter_field_hash.keys & params.keys).present?
-        end.keys
-
-    assert_equal(associations_to_be_included, associations_actually_included)
+  def assert_associations_are_included(params, expected_inclusions)
+    query_spec = get_sample_query_spec()
+    associations_actually_included, wh_clauses = get_inclusions_and_where_clauses(params, query_spec)
+    assert_equal(expected_inclusions, associations_actually_included)
   end
 
   def get_generated_conditions(params)
