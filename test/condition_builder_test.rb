@@ -1,19 +1,19 @@
 require "rubygems"
-require 'active_record'
-require 'active_support/all'
 require 'bundler/setup'
 require "shoulda"
-require "test/unit"
+require 'test/unit'
 require "activerecord-auto_filter"
 
-require_relative "helpers/sample_model_definitions"
 require_relative "helpers/db_setup_helper"
 require_relative "../lib/activerecord-auto_filter/condition_builder"
 
 class ConditionBuilderTest < Test::Unit::TestCase
-  include SampleModelDefinitions
-  include DbSetupHelper
+  include DbSetupHelper # Arel has a dependency on db connection
   include ActiveRecord::ConditionBuilder
+
+  class ModelA < ActiveRecord::Base; end
+  class ModelB < ActiveRecord::Base; end
+  class ModelC < ActiveRecord::Base; end
 
   def setup
     super
@@ -42,9 +42,9 @@ class ConditionBuilderTest < Test::Unit::TestCase
 
   context "where clause filter structure check" do
     should "contain appropriate kind filters - string or hash" do
-      table1_name = Order.table_name.to_sym
-      table2_name = OrderItem.table_name.to_sym
-      table3_name = Product.table_name.to_sym
+      table1_name = ModelA.table_name.to_sym
+      table2_name = ModelB.table_name.to_sym
+      table3_name = ModelC.table_name.to_sym
       params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4}
       query_details = get_generated_conditions(params).last
 
@@ -62,29 +62,27 @@ class ConditionBuilderTest < Test::Unit::TestCase
     should "contain multiple kind of filters for a given association" do
       params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4, :f4 => 5}
       query_spec = get_sample_query_spec
-      query_spec[:association2][:f4] =
-          {
-            :filter_type => :string, :filter_operator => :eq,
-            :source_table_model => OrderItemUnit, :column => :c4
-          }
+      query_spec[:association2][:f4] = {
+          :filter_type => :string, :filter_operator => :eq,
+          :source_table_model => ModelB, :column => :c4
+      }
 
       result = emit_inclusion_and_filter_details(params, query_spec)
       assert_equal(2,result[:association2].size)
     end
 
     should "contain join filters" do
-      table1_model = Order
-      table2_model = OrderItem
+      table1_model = ModelA
+      table2_model = ModelB
       table1_name = table1_model.table_name
       table2_name = table2_model.table_name
       query_spec = get_sample_query_spec
       params = {:f2 => :f2_val, :f3 => 4}
 
-      query_spec[:association2][:join_filter] =
-          {
-             :source_table_model1 => table1_model, :table1_column => :col1,
-             :source_table_model2 => table2_model, :table2_column => :col2,
-          }
+      query_spec[:association2][:join_filter] = {
+          :source_table_model1 => table1_model, :table1_column => :col1,
+             :source_table_model2 => table2_model, :table2_column => :col2
+      }
       result = emit_inclusion_and_filter_details(params, query_spec)
 
       assert_equal(2,result[:association2].size)
@@ -113,7 +111,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
                 :f1 =>
                     {
                         :filter_type => :string, :filter_operator => :lt,
-                        :source_table_model => Order, :column => :c1
+                        :source_table_model => ModelA, :column => :c1
                     }
             },
         :association2 =>
@@ -121,7 +119,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
                 :f2 =>
                     {
                         :filter_type => :hash, :filter_operator => :eq,
-                        :source_table_model => OrderItem, :column => :c2
+                        :source_table_model => ModelB, :column => :c2
                     }
             },
         :association3 =>
@@ -129,7 +127,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
                 :f3 =>
                     {
                         :filter_type => :string, :filter_operator => :gteq,
-                        :source_table_model => Product, :column => :c3
+                        :source_table_model => ModelC, :column => :c3
                     }
             }
     }
