@@ -46,7 +46,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
       table2_name = ModelB.table_name.to_sym
       table3_name = ModelC.table_name.to_sym
       params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4}
-      query_details = get_generated_conditions(params).last
+      query_details = emit_inclusion_and_filter_details(params, get_sample_query_spec)
 
       # Check hash filter exists and its structure
       association_containing_hash_filter = query_details.delete(:association2)
@@ -81,7 +81,7 @@ class ConditionBuilderTest < Test::Unit::TestCase
 
       query_spec[:association2][:join_filter] = {
           :source_table_model1 => table1_model, :table1_column => :col1,
-             :source_table_model2 => table2_model, :table2_column => :col2
+          :source_table_model2 => table2_model, :table2_column => :col2
       }
       result = emit_inclusion_and_filter_details(params, query_spec)
 
@@ -96,12 +96,6 @@ class ConditionBuilderTest < Test::Unit::TestCase
     query_spec = get_sample_query_spec()
     associations_actually_included, wh_clauses = get_inclusions_and_where_clauses(params, query_spec)
     assert_equal(expected_inclusions, associations_actually_included)
-  end
-
-  def get_generated_conditions(params)
-    query_spec = get_sample_query_spec
-    result = emit_inclusion_and_filter_details(params, query_spec)
-    return query_spec, result
   end
 
   def get_sample_query_spec
