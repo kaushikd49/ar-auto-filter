@@ -52,14 +52,15 @@ module ActiveRecord
     end
 
     def emit_inclusion_and_filter_details(params,query_spec)
+      exclusions = [:join_filter,:is_inclusion_mandatory]
       query_spec.each_with_object({}) do |(association,association_filter_spec), res|
         join_spec = association_filter_spec.delete(:join_filter)
         is_inclusion_mandatory = association_filter_spec.delete(:is_inclusion_mandatory)
-
+        new_association_filter_spec = association_filter_spec.reject{|e| exclusions.include?(e)}
         join_filter = get_association_join_filter(join_spec)
 
         where_clause_filters =
-            association_filter_spec.each_with_object([]) do |(param_field,filter_spec),filter_res|
+            new_association_filter_spec.each_with_object([]) do |(param_field,filter_spec),filter_res|
               value = params[param_field]
               if value.present?
                 filter_res << get_where_clause_filter(filter_spec, query_spec, value)

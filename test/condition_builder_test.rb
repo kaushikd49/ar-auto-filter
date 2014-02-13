@@ -16,7 +16,6 @@ class ConditionBuilderTest < Test::Unit::TestCase
   class ModelC < ActiveRecord::Base; end
 
   def setup
-    super
     do_db_setups
   end
 
