@@ -1,6 +1,6 @@
 # Activerecord::AutoFilter
 
-TODO: Write a gem description
+Configuration based condition building and inclusion handling extension for ActiveRecord::Base
 
 ## Installation
 
@@ -18,7 +18,10 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Please see demo.rb for usage. To execute the demo, do the following:
+1. Checkout this repo
+2. Run bundle install
+3. Run ruby demo.rb
 
 ## Contributing
 
