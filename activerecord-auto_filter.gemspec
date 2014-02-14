@@ -9,7 +9,7 @@ Gem::Specification.new do |gem|
   gem.authors       = ["kaushik"]
   gem.email         = ["kaushikd49@gmail.com"]
   gem.description   = %q{Configuration based condition building and inclusion handling extension for ActiveRecord::Base}
-  gem.summary       = %q{Where condition building extension for ActiveRecord}
+  gem.summary       = %q{Inclusions and where-condition building extension for ActiveRecord}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
