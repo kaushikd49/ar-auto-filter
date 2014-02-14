@@ -3,7 +3,16 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in blah.gemspec
 gemspec
 
-gem 'mysql2'
+# Database Adapters
+platforms :ruby do
+  gem "mysql2"
+end
+
+platforms :jruby do
+  gem "jdbc-mysql"
+  gem "activerecord-jdbcmysql-adapter"
+end
+
 gem 'activerecord'
 
 
