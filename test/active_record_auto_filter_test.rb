@@ -2,14 +2,14 @@ require "rubygems"
 require "shoulda"
 require 'test/unit'
 require 'active_record'
-require_relative "helpers/db_setup_helper"
+require_relative "helpers/data_layer_setup"
 require_relative "../lib/activerecord-auto_filter"
 
 class ActiveRecordAutoFilterTest < Test::Unit::TestCase
-  include DbSetupHelper # Arel has a dependency on db connection
+  include DataLayerSetup # Arel has a dependency on db connection
 
   def setup
-    do_db_setups
+    setup_datalayer()
   end
 
   context "inclusions check" do

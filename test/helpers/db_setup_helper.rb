@@ -1,5 +1,3 @@
-require_relative "sample_model_definitions"
-
 module DbSetupHelper
   include SampleModelDefinitions
 
@@ -11,7 +9,6 @@ module DbSetupHelper
     create_database(DATABASE)
     establish_connection_with_db(DATABASE, CONNECTION_SPEC)
     ActiveRecord::Base.logger = Logger.new(STDOUT) if stdout_logging
-    create_tables()
   end
 
   def create_database(database)

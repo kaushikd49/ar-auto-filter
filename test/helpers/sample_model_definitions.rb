@@ -20,6 +20,7 @@ module SampleModelDefinitions
     ActiveRecord::Schema.define(:version => 20140124132738) do
       create_table :orders, :force => true do |t|
         t.text :user
+        t.string :product_id
         t.integer :quantity, :default => true
       end
 

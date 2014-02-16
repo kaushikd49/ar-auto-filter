@@ -1,31 +1,51 @@
 require 'bundler/setup'
 require "logger"
 require "./lib/activerecord-auto_filter"
-require_relative "test/helpers/db_setup_helper"
+require_relative "test/helpers/data_layer_setup"
+
+include DataLayerSetup
 
 
-include SampleModelDefinitions
-include DbSetupHelper
-
-def run_demo
-  do_db_setups(true)
-
-  params = {:vertical => :book, :price_from => 100, :price_to => 600, :size => 100, :state => :approved}
-  ar_with_query_builded  = Order.apply_includes_and_where_clauses(params, get_query_spec)
-
-  str = "\n" + "*"*40 + " Final query generated is below " + "*"*40 + "\n"
-  puts str; ar_with_query_builded.inspect; puts
+def demo
+  setup_datalayer(true)
+  pretty_print("DB setups complete")
+  run_demo_with_joins
+  run_demo_with_no_joins
 end
 
+def run_demo_with_joins
+  pretty_print("Demo with joins")
+  params = {:vertical => :book, :price_from => 100, :price_to => 600, :size => 100, :state => :approved}
+  generate_demo(params)
+end
+
+
+def run_demo_with_no_joins
+  pretty_print("Demo without joins")
+  params = {:product_id => :f1}
+  generate_demo(params)
+end
+
+def pretty_print(string)
+  num_stars = (100-string.size)/2
+  puts "\n" + "*" * num_stars + " #{string} " + "*" * num_stars + "\n"
+end
+
+def generate_demo(params)
+  ar_with_query_builded = Order.apply_includes_and_where_clauses(params, get_query_spec)
+  pretty_print("Final query generated is below")
+  ar_with_query_builded.inspect
+  puts "\n"
+end
 
 def get_query_spec
   {
       :self =>
           {
-              :fsn =>
+              :product_id =>
                   {
                       :filter_type => :hash, :filter_operator => :eq,
-                      :source_table_model => Order, :column => :fsn
+                      :source_table_model => Order, :column => :product_id
                   }
           },
       :order_items =>
@@ -67,6 +87,4 @@ end
 
 
 
-
-run_demo
-
+demo()
