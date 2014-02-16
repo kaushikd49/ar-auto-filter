@@ -15,22 +15,19 @@ class ActiveRecord::Base
     #           {
     #             <param_field> =>
     #               {
-    #                 :filter_type => <:string|:hash>, :filter_operator => <:gt|:lt|:gteq|:lteq:in:not_in>,
-    #                 :source_table_model => <ar_class>, :column => <col_name_sym>
+    #                 :filter_operator => <:gt|:lt|:gteq|:lteq:in:not_in>, :column => <col_name_sym>
     #               }
     #           }
     #         :association1 =>
     #           {
     #             <param_field> =>
     #               {
-    #                 :filter_type => <:string|:hash>, :filter_operator => <:gt|:lt|:gteq|:lteq|:in|:not_in>,
-    #                 :source_table_model => <ar_class>, :column => <col_name_sym>
+    #                 :filter_operator => <:gt|:lt|:gteq|:lteq|:in|:not_in>, :column => <col_name_sym>
     #               },
     #             ...
     #             :join_filter =>
     #               {
-    #                 :source_table_model1 => <ar_class>, :table1_column => <column_name>,
-    #                 :source_table_model2 => <ar_class>, :table2_column => <column_name>,
+    #                 :table1_column => <column_name>, :table2_column => <column_name>,
     #               },
     #             :is_inclusion_mandatory => <true|false>
     #           },
@@ -66,7 +63,7 @@ class ActiveRecord::Base
             new_association_filter_spec.each_with_object([]) do |(param_field,filter_spec),filter_res|
               value = params[param_field]
               if value.present?
-                filter_res << get_where_clause_filter(filter_spec, query_spec, value, association_model)
+                filter_res << get_where_clause_filter(filter_spec, value, association_model)
               end
             end
 
@@ -86,14 +83,13 @@ class ActiveRecord::Base
       get_where_clause_sql(table2.arel_table[table2_col], table1, table1_col, :eq)
     end
 
-    def get_where_clause_filter(filter_spec, query_spec, value, table)
-      case filter_spec[:filter_type]
-        when :string
-          construct_str_filter(value, filter_spec, table)
-        when :hash
+    def get_where_clause_filter(filter_spec, value, table)
+      # Hash filters have good equality query abstractions. So, lets
+      # choose them over string filters for equality operator.
+      if filter_spec[:filter_operator] == :eq
           construct_hash_filter(value, filter_spec, table)
-        else
-          raise Exception.new("Improper filter_type in #{query_spec}")
+      else
+          construct_str_filter(value, filter_spec, table)
       end
     end
 

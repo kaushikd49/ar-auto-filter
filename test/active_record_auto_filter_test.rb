@@ -1,11 +1,11 @@
 require "rubygems"
-require 'bundler/setup'
 require "shoulda"
 require 'test/unit'
-require_relative "../lib/activerecord-auto_filter"
+require 'active_record'
 require_relative "helpers/db_setup_helper"
+require_relative "../lib/activerecord-auto_filter"
 
-class ConditionBuilderTest < Test::Unit::TestCase
+class ActiveRecordAutoFilterTest < Test::Unit::TestCase
   include DbSetupHelper # Arel has a dependency on db connection
 
   def setup
@@ -53,27 +53,19 @@ class ConditionBuilderTest < Test::Unit::TestCase
     should "contain multiple kind of filters for a given association" do
       params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4, :f4 => 5}
       query_spec = get_sample_query_spec
-      query_spec[:order_items][:f4] = {
-          :filter_type => :string, :filter_operator => :eq,
-          :source_table_model => OrderItem, :column => :c4
-      }
+      query_spec[:order_items][:f4] = { :filter_operator => :eq, :column => :c4 }
 
       result = Order.emit_inclusion_and_filter_details(params, query_spec)
       assert_equal(2,result[:order_items].size)
     end
 
     should "contain join filters" do
-      table1_model = Order
-      table2_model = OrderItem
-      table1_name = table1_model.table_name
-      table2_name = table2_model.table_name
+      table1_name = Order.table_name
+      table2_name = OrderItem.table_name
       query_spec = get_sample_query_spec
       params = {:f2 => :f2_val, :f3 => 4}
 
-      query_spec[:order_items][:join_filter] = {
-          :source_table_model1 => table1_model, :table1_column => :col1,
-          :source_table_model2 => table2_model, :table2_column => :col2
-      }
+      query_spec[:order_items][:join_filter] = { :table1_column => :col1, :table2_column => :col2 }
       result = Order.emit_inclusion_and_filter_details(params, query_spec)
 
       assert_equal(2,result[:order_items].size)
@@ -95,21 +87,21 @@ class ConditionBuilderTest < Test::Unit::TestCase
             {
                 :f1 =>
                     {
-                        :filter_type => :string, :filter_operator => :lt, :column => :c1
+                        :filter_operator => :lt, :column => :c1
                     }
             },
         :order_items =>
             {
                 :f2 =>
                     {
-                        :filter_type => :hash, :filter_operator => :eq, :column => :c2
+                        :filter_operator => :eq, :column => :c2
                     }
             },
         :product =>
             {
                 :f3 =>
                     {
-                        :filter_type => :string, :filter_operator => :gteq, :column => :c3
+                        :filter_operator => :gteq, :column => :c3
                     }
             }
     }

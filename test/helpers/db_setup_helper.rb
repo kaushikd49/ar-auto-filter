@@ -25,5 +25,4 @@ module DbSetupHelper
   def establish_connection_with_db(database, connection_spec)
     ActiveRecord::Base.establish_connection(connection_spec.merge(database: database))
   end
-
 end
