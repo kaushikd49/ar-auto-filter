@@ -46,7 +46,8 @@ class ActiveRecordAutoFilterTest < Test::Unit::TestCase
       # Check string filter exists and its structure
       assert(query_details.all? do |association,filter_details|
         string_where_clause = filter_details.first
-        string_where_clause.match(/#{table1_name}.*c1.*f1_val/) or string_where_clause.match(/#{table3_name}.*c3.*4/)
+        str_filter_format_regexps = [/#{table1_name}.*c1.*f1_val/, /#{table3_name}.*c3.*4/]
+        str_filter_format_regexps.any?{|r| string_where_clause.match(r)}
       end)
     end
 
