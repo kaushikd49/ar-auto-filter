@@ -44,42 +44,36 @@ def get_query_spec
           {
               :product_id =>
                   {
-                      :filter_type => :hash, :filter_operator => :eq,
-                      :source_table_model => Order, :column => :product_id
+                      :filter_operator => :eq, :column => :product_id
                   }
           },
       :order_items =>
           {
               :state =>
                   {
-                      :filter_type => :hash, :filter_operator => :eq,
-                      :source_table_model => OrderItem, :column => :state
+                      :filter_operator => :eq, :column => :state
                   }
           },
       :product =>
           {
               :vertical =>
                   {
-                      :filter_type => :hash, :filter_operator => :eq,
-                      :source_table_model => Product, :column => :vertical
+                      :filter_operator => :eq, :column => :vertical
                   },
               :price_from =>
                   {
-                      :filter_type => :string, :filter_operator => :gteq,
-                      :source_table_model => Product, :column => :selling_price
+                       :filter_operator => :gteq, :column => :selling_price
                   },
               :price_to =>
                   {
-                      :filter_type => :string, :filter_operator => :lt,
-                      :source_table_model => Product, :column => :selling_price
+                       :filter_operator => :lt, :column => :selling_price
                   }
           },
       :order_item_units =>
           {
               :size =>
                   {
-                      :filter_type => :hash, :filter_operator => :eq,
-                      :source_table_model => OrderItemUnit, :column => :size
+                      :filter_operator => :eq, :column => :size
                   }
           }
   }
