@@ -1,7 +1,6 @@
 require 'bundler/setup'
 require "logger"
 require "./lib/activerecord-auto_filter"
-require_relative "test/helpers/sample_model_definitions"
 require_relative "test/helpers/db_setup_helper"
 
 
@@ -10,10 +9,9 @@ include DbSetupHelper
 
 def run_demo
   do_db_setups(true)
-  create_tables()
 
   params = {:vertical => :book, :price_from => 100, :price_to => 600, :size => 100, :state => :approved}
-  ar_with_query_builded  = Order.apply_where_clause(params, get_query_spec)
+  ar_with_query_builded  = Order.apply_includes_and_where_clauses(params, get_query_spec)
 
   str = "\n" + "*"*40 + " Final query generated is below " + "*"*40 + "\n"
   puts str; ar_with_query_builded.inspect; puts
