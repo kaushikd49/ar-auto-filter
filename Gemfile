@@ -13,7 +13,6 @@ platforms :jruby do
   gem "activerecord-jdbcmysql-adapter"
 end
 
-gem 'activerecord'
 
 
 group :test do

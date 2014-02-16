@@ -1,6 +1,6 @@
 require 'active_record'
 require "active_record/version"
-require "activerecord-auto_filter/version"
+require "./lib/activerecord-auto_filter/version"
 require "./lib/activerecord-auto_filter/condition_builder"
 
 class ActiveRecord::Base
