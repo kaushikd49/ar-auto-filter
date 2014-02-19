@@ -1,6 +1,5 @@
 require 'active_record'
 require "active_record/version"
-require "./lib/activerecord-auto_filter/version"
 
 class ActiveRecord::Base
 
@@ -56,7 +55,7 @@ class ActiveRecord::Base
       query_spec.each_with_object({}) do |(association,association_filter_spec), res|
         join_spec, is_inclusion_mandatory = association_filter_spec.values_at(*exclusions)
         new_association_filter_spec = association_filter_spec.reject{|e| exclusions.include?(e)}
-        association_model = (association == :self)? self : self.reflect_on_association(association.to_sym).klass
+        association_model = get_association_model(association)
         join_filter = get_association_join_filter(join_spec, self, association_model)
 
         where_clause_filters =
@@ -76,7 +75,11 @@ class ActiveRecord::Base
       end
     end
 
-    private
+  def get_association_model(association)
+    (association == :self) ? self : self.reflect_on_association(association.to_sym).klass
+  end
+
+  private
     def get_association_join_filter(join_filter, table1, table2)
       return if join_filter.blank?
       table1_col,table2_col = join_filter.values_at(:table1_column,:table2_column)

@@ -15,19 +15,19 @@ class ActiveRecordAutoFilterTest < Test::Unit::TestCase
   context "inclusions check" do
     should "contain only expected associations for inclusions" do
       params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4, :f4 => 41}
-      assert_associations_are_included(params, [:order_items, :product])
+      assert_associations_are_included(params, :order_items, :product)
 
       params = {:f1 => :f1_val, :f2 => :f2_val, :f3 => 4}
-      assert_associations_are_included(params, [:order_items, :product])
+      assert_associations_are_included(params, :order_items, :product)
 
       params = {:f2 => :f2_val, :f3 => 4}
-      assert_associations_are_included(params, [:order_items, :product])
+      assert_associations_are_included(params, :order_items, :product)
 
       params = {:f3 => 4}
-      assert_associations_are_included(params, [:product])
+      assert_associations_are_included(params, :product)
 
       params = {:f2 => :f2_val}
-      assert_associations_are_included(params, [:order_items])
+      assert_associations_are_included(params, :order_items)
     end
   end
 
@@ -76,7 +76,7 @@ class ActiveRecordAutoFilterTest < Test::Unit::TestCase
     end
   end
 
-  def assert_associations_are_included(params, expected_inclusions)
+  def assert_associations_are_included(params, *expected_inclusions)
     query_spec = get_sample_query_spec()
     associations_actually_included, wh_clauses = Order.get_inclusions_and_where_clauses(params, query_spec)
     assert_equal(expected_inclusions, associations_actually_included)
