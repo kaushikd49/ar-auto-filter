@@ -3,7 +3,7 @@
 Configuration based condition building and inclusion handling extension for ActiveRecord::Base
 
 In case of eager loading of a model and its associations, it may be required to obtain query results based on filter
-criteria that spans across multiple associations. To achieve this, we tend to construct dynamic where clauses
+criteria that span across multiple associations. To achieve this, we tend to construct dynamic where clauses
 based on the presence of corresponding filter criteria.
 Although, the effort in doing this is less, it causes code duplication and hence violates the DRY principle. This
 gem tries to address that concern. Given request param hash and query specification hash, it is capable of emitting the
@@ -14,9 +14,10 @@ The primary goal of this gem is building dynamic query conditions. So, it is not
 eager loading like above and it can also be used to build dynamic where conditions on just a given model too.
 
 Notes: The following concerns will be addressed later.
-- Currently it is mysql specific as the condition extraction is based on splitting the arel query by the word 'WHERE'.
-- Instead of only building where conditions based on param value presence, accept procs for providing better control for the programmer.
+- Currently it is mysql specific as the condition extraction is based on splitting the Arel::Table query by the word 'WHERE'.
+- Accept Procs for determining the condition for building where clause, instead of just param value presence. This gives better control for the programmer.
 
+See activerecord-auto_filter.gemspec for allowed ruby versions.
 
 ## Installation
 
@@ -32,9 +33,10 @@ Or install it yourself as:
 
     $ gem install activerecord-auto_filter
 
-## Usage
+## Demo
 
-Please see demo.rb for usage. To execute the demo, do the following:
+Run demo.rb for usage demo. Steps are below.
+
 1. Checkout this repo
 2. Run bundle install
 3. Run ruby demo.rb
