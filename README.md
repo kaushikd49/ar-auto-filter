@@ -45,6 +45,8 @@ Run demo.rb for usage demo. Steps are below.
 2. Run bundle install
 3. Run ruby demo.rb
 
+To just see the demo output, visit [demo output page] (https://github.com/kaushikd49/ar-auto-filter/wiki/Demo-output)
+
 ## Contributing
 
 1. Fork it
