@@ -5,7 +5,7 @@ require_relative "test/helpers/data_layer_setup"
 
 include DataLayerSetup
 
-@@query_spec = {
+QUERY_SPEC = {
     :self =>
         {
             :product_id =>
@@ -45,6 +45,7 @@ include DataLayerSetup
 }
 
 def demo
+  pretty_print("DB setups started")
   setup_datalayer(true)
   pretty_print("DB setups complete")
   run_demo_with_joins
@@ -64,7 +65,8 @@ def run_demo_with_no_joins
 end
 
 def generate_demo(params)
-  ar_with_query_builded = Order.apply_includes_and_where_clauses(params, @@query_spec)
+  ar_with_query_builded = Order.apply_includes_and_where_clauses(params, QUERY_SPEC)
+  puts  "Params for this demo are #{params}"
   pretty_print("Final query generated is below")
   ar_with_query_builded.inspect
   puts "\n"
